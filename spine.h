@@ -67,6 +67,9 @@ public:
 
 		spAtlas *atlas;
 		spSkeletonData *data;
+
+		spAtlas *nm_atlas;
+		spSkeletonData *nm_data;
 	};
 
 private:

@@ -44,6 +44,9 @@ Spine::SpineResource::SpineResource() {
 
 	atlas = NULL;
 	data = NULL;
+
+	nm_atlas = NULL;
+	nm_data = NULL;
 }
 
 Spine::SpineResource::~SpineResource() {
@@ -53,6 +56,12 @@ Spine::SpineResource::~SpineResource() {
 
 	if (data != NULL)
 		spSkeletonData_dispose(data);
+
+	if (nm_atlas != NULL)
+		spAtlas_dispose(nm_atlas);
+
+	if (nm_data != NULL)
+		spSkeletonData_dispose(nm_data);
 }
 
 Array *Spine::invalid_names = NULL;
