@@ -80,6 +80,9 @@ private:
 	spAnimationState* state;
 	mutable Vector<float> world_verts;
 
+	spSkeleton* nm_skeleton;
+	spAnimationState* nm_state;
+
 	float speed_scale;
 	String autoplay;
 	AnimationProcessMode animation_process_mode;

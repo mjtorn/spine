@@ -107,10 +107,20 @@ void Spine::_spine_dispose() {
 		stop();
 	}
 
-	if (state) {
+	//print_line(String("state ") + (state == 0x0 ? String("null") : String("not null")));
+	//print_line(String("nm_state ") + (nm_state == 0x0 ? String("null") : String("not null")));
+	if (nm_state) {
+		spAnimationStateData_dispose(nm_state->data);
+		spAnimationState_dispose(nm_state);
+	}
 
+	if (state) {
 		spAnimationStateData_dispose(state->data);
 		spAnimationState_dispose(state);
+	}
+
+	if (nm_skeleton) {
+		spSkeleton_dispose(nm_skeleton);
 	}
 
 	if (skeleton)
@@ -118,6 +128,10 @@ void Spine::_spine_dispose() {
 
 	state = NULL;
 	skeleton = NULL;
+
+	nm_state = NULL;
+	skeleton = NULL;
+
 	res = RES();
 
 	for (AttachmentNodes::Element *E = attachment_nodes.front(); E; E = E->next()) {
@@ -733,6 +747,14 @@ void Spine::set_resource(Ref<Spine::SpineResource> p_data) {
 	state->rendererObject = this;
 	state->listener = spine_animation_callback;
 
+	if (res->nm_data) {
+		nm_skeleton = spSkeleton_create(res->nm_data);
+
+		nm_state = spAnimationState_create(spAnimationStateData_create(nm_skeleton->data));
+		nm_state->rendererObject = this;
+		nm_state->listener = spine_animation_callback;
+	}
+
 	_update_verties_count();
 
 	// update children slots
@@ -745,6 +767,9 @@ void Spine::set_resource(Ref<Spine::SpineResource> p_data) {
 	}
 
 	// add new slots children
+	if (nm_skeleton)
+		ERR_FAIL_COND(nm_skeleton->slotsCount != skeleton->slotsCount);
+
 	for (int i = 0, n = skeleton->slotsCount; i < n; i++) {
 		spSlot *slot = skeleton->drawOrder[i];
 		auto slot_node = memnew(SpineSlot);
@@ -1491,8 +1516,10 @@ Spine::Spine()
 	: batcher(this), fx_node(memnew(Node2D)), fx_batcher(fx_node) {
 
 	skeleton = NULL;
+	nm_skeleton = NULL;
 	root_bone = NULL;
 	state = NULL;
+	nm_state = NULL;
 	res = RES();
 	world_verts.resize(1000); // Max number of vertices per mesh.
 	memset(world_verts.ptrw(), 0, world_verts.size() * sizeof(float));
