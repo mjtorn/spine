@@ -4,11 +4,13 @@
 SpineSlot::SpineSlot() {
 	this->spine = NULL;
 	this->slot = NULL;
+	this->nm_slot = NULL;
 }
 
 SpineSlot::~SpineSlot() {
 	this->spine = NULL;
 	this->slot = NULL;
+	this->nm_slot = NULL;
 }
 
 

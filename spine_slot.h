@@ -16,10 +16,12 @@ protected:
 
 public:
 	spSlot *slot;
+	spSlot *nm_slot;
 
-	void init(Spine *spine, spSlot *slot) {
+	void init(Spine *spine, spSlot *slot, spSlot *nm_slot) {
 		this->spine = spine;
 		this->slot = slot;
+		this->nm_slot = nm_slot;
 	}
 
 	SpineSlot();
