@@ -173,6 +173,7 @@ void Spine::draw_slot(SpineSlot *spine_slot) {
 		return;
 
 	auto slot = spine_slot->slot;
+	auto nm_slot = spine_slot->nm_slot;
 
 	if (!slot->attachment)
 		return;
@@ -192,12 +193,16 @@ void Spine::draw_slot(SpineSlot *spine_slot) {
 
 	bool is_fx = false;
 	Ref<Texture> texture;
+	Ref<Texture> nm_texture;
 
 	switch (slot->attachment->type) {
 
 		case SP_ATTACHMENT_REGION: {
 			spRegionAttachment *attachment = (spRegionAttachment *)slot->attachment;
 			is_fx = strstr(attachment->path, fx_prefix) != NULL;
+
+			spRegionAttachment *nm_attachment = NULL;
+			if (nm_slot) nm_attachment = (spRegionAttachment *)nm_slot->attachment;
 
 			// get points from Spine (2 pairs of x/ys for 4 points)
 			float spPoints[10];
@@ -207,6 +212,8 @@ void Spine::draw_slot(SpineSlot *spine_slot) {
 			// get texture and uvs from Spine
 			texture = spine_get_texture(attachment);
 			const float *spUVs = attachment->uvs;
+
+			if (nm_attachment) nm_texture = spine_get_texture(nm_attachment);
 
 			// the indices are fixed
 			static int spIndices[6] = { 0, 1, 2, 2, 3, 0 };
@@ -231,24 +238,29 @@ void Spine::draw_slot(SpineSlot *spine_slot) {
 				p_colors.push_back(color);
 				p_uvs.push_back(Vector2(spUVs[atPoint], spUVs[atPoint + 1]));
 			}
-			
+
 			Vector<int> p_indices;
 			p_indices.resize(spIndicesCount);
 			memcpy(p_indices.ptrw(), spIndices, spIndicesCount * sizeof(int));
-			
+
 			VisualServer::get_singleton()->canvas_item_add_triangle_array(spine_slot->get_canvas_item(),
 					p_indices,
 					p_points,
 					p_colors,
 					p_uvs,
-					Vector<int>(),
-					Vector<float>(),
-					texture->get_rid());
+					Vector<int>(),    // bones
+					Vector<float>(),  // weights
+					texture->get_rid(),
+					-1,               // int p_count = -1
+					nm_texture.is_null() ? RID() : nm_texture->get_rid());
 			break;
 		}
 		case SP_ATTACHMENT_MESH: {
 			spMeshAttachment *attachment = (spMeshAttachment *)slot->attachment;
 			is_fx = strstr(attachment->path, fx_prefix) != NULL;
+
+			spMeshAttachment *nm_attachment = NULL;
+			if (nm_slot) nm_attachment = (spMeshAttachment *)nm_slot->attachment;
 
 			// get points from Spine (2 pairs of x/ys for 4 points)
 			spVertexAttachment_computeWorldVertices(SUPER(attachment), slot, 0, attachment->super.worldVerticesLength, world_verts.ptrw(), 0, 2);
@@ -258,6 +270,8 @@ void Spine::draw_slot(SpineSlot *spine_slot) {
 			// get texture and uvs from Spine
 			texture = spine_get_texture(attachment);
 			const float *spUVs = attachment->uvs;
+
+			if (nm_attachment) nm_texture = spine_get_texture(nm_attachment);
 
 			// the indices are fixed
 			unsigned short *spIndices = attachment->triangles;
@@ -293,9 +307,11 @@ void Spine::draw_slot(SpineSlot *spine_slot) {
 					p_points,
 					p_colors,
 					p_uvs,
-					Vector<int>(),
-					Vector<float>(),
-					texture->get_rid());
+					Vector<int>(),    // bones
+					Vector<float>(),  // weights
+					texture->get_rid(),
+					-1,               // int p_count = -1
+					nm_texture.is_null() ? RID() : nm_texture->get_rid());
 			break;
 		}
 
@@ -692,7 +708,7 @@ void Spine::_notification(int p_what) {
 			if (processing) {
 				_animation_process(get_process_delta_time());
 				_update_children();
-			}	
+			}
 		} break;
 		case NOTIFICATION_PHYSICS_PROCESS: {
 
@@ -703,7 +719,7 @@ void Spine::_notification(int p_what) {
 				_animation_process(get_physics_process_delta_time());
 				_update_children();
 			}
-				
+
 		} break;
 
 		case NOTIFICATION_DRAW: {
@@ -753,6 +769,8 @@ void Spine::set_resource(Ref<Spine::SpineResource> p_data) {
 		nm_state = spAnimationState_create(spAnimationStateData_create(nm_skeleton->data));
 		nm_state->rendererObject = this;
 		nm_state->listener = spine_animation_callback;
+	} else {
+		nm_skeleton = NULL;
 	}
 
 	_update_verties_count();
@@ -772,8 +790,10 @@ void Spine::set_resource(Ref<Spine::SpineResource> p_data) {
 
 	for (int i = 0, n = skeleton->slotsCount; i < n; i++) {
 		spSlot *slot = skeleton->drawOrder[i];
+		spSlot *nm_slot = NULL;
+		if (nm_skeleton) nm_slot = nm_skeleton->drawOrder[i];
 		auto slot_node = memnew(SpineSlot);
-		slot_node->init(this, slot);
+		slot_node->init(this, slot, nm_slot);
 		slot_node->set_name(slot->data->name);
 		slot_node->set_z_index(i);
 		add_child(slot_node);
