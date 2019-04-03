@@ -174,9 +174,23 @@ static void spine_free(void *ptr) {
 
 class ResourceFormatLoaderSpine : public ResourceFormatLoader {
 public:
+	ResourceFormatLoaderSpine() {
+#ifdef DEBUG_ENABLED
+		print_line("Spine: ResourceFormatLoaderSpine constructed");
+#endif
+	}
+
+	~ResourceFormatLoaderSpine() {
+#ifdef DEBUG_ENABLED
+		print_line("Spine: ResourceFormatLoaderSpine destructed");
+#endif
+	}
+
 
 	virtual RES load(const String &p_path, const String& p_original_path = "", Error *p_err=NULL) {
+#ifdef DEBUG_ENABLED
 		float start = OS::get_singleton()->get_ticks_msec();
+#endif
 
 		Spine::SpineResource *res = memnew(Spine::SpineResource);
 		Ref<Spine::SpineResource> ref(res);
@@ -234,8 +248,10 @@ public:
 		}
 
 		res->set_path(p_path);
+#ifdef DEBUG_ENABLED
 		float finish = OS::get_singleton()->get_ticks_msec();
-		// print_line("Spine resource (" + p_path + ") loaded in " + itos(finish-start) + " msecs");
+		print_line("Spine resource (" + p_path + ") loaded in " + itos(finish-start) + " msecs");
+#endif
 		return ref;
 	}
 

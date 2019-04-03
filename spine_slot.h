@@ -1,6 +1,10 @@
 #pragma once
 
+#include "scene/2d/canvas_item.h"
+#include "core/print_string.h"
 #include "spine.h"
+
+#include <stddef.h>
 
 class SpineSlot : public Node2D {
 	GDCLASS(SpineSlot, Node2D);
