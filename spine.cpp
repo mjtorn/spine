@@ -64,14 +64,6 @@ Spine::SpineResource::~SpineResource() {
 		spSkeletonData_dispose(nm_data);
 }
 
-Array *Spine::invalid_names = NULL;
-Array Spine::get_invalid_names() {
-	if (invalid_names == NULL) {
-		invalid_names = memnew(Array());
-	}
-	return *invalid_names;
-}
-
 void Spine::spine_animation_callback(spAnimationState *p_state, spEventType p_type, spTrackEntry *p_track, spEvent *p_event) {
 
 	((Spine *)p_state->rendererObject)->_on_animation_state_event(p_track->trackIndex, p_type, p_event, 1);

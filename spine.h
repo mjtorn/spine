@@ -140,8 +140,6 @@ private:
 	void _update_attachment_nodes();
 
 protected:
-	static Array *invalid_names;
-
 	bool _set(const StringName& p_name, const Variant& p_value);
 	bool _get(const StringName& p_name, Variant &r_ret) const;
 	void _get_property_list(List<PropertyInfo> *p_list) const;
@@ -150,8 +148,6 @@ protected:
 	static void _bind_methods();
 
 public:
-	static Array get_invalid_names();
-
 	// set/get spine resource
 	void set_resource(Ref<SpineResource> p_data);
 	Ref<SpineResource> get_resource();
