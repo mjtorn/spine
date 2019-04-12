@@ -248,8 +248,6 @@ void Spine::draw_slot(SpineSlot *spine_slot) {
 					p_points,
 					p_colors,
 					p_uvs,
-					Vector<int>(),    // bones
-					Vector<float>(),  // weights
 					texture->get_rid(),
 					-1,               // int p_count = -1
 					nm_texture.is_null() ? RID() : nm_texture->get_rid());
@@ -307,8 +305,6 @@ void Spine::draw_slot(SpineSlot *spine_slot) {
 					p_points,
 					p_colors,
 					p_uvs,
-					Vector<int>(),    // bones
-					Vector<float>(),  // weights
 					texture->get_rid(),
 					-1,               // int p_count = -1
 					nm_texture.is_null() ? RID() : nm_texture->get_rid());
@@ -1272,7 +1268,7 @@ Ref<Shape2D> Spine::get_bounding_box(const String &p_slot_name, const String &p_
 	Vector<Vector2> points;
 	points.resize(info->verticesCount / 2);
 	for (int idx = 0; idx < info->verticesCount / 2; idx++)
-		points.write[idx] = Vector2(info->vertices[idx * 2], -info->vertices[idx * 2 + 1]);
+		points[idx] = Vector2(info->vertices[idx * 2], -info->vertices[idx * 2 + 1]);
 
 	ConvexPolygonShape2D *shape = memnew(ConvexPolygonShape2D);
 	shape->set_points(points);
